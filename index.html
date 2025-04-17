@@ -31,6 +31,28 @@
                 </div>
             </section>
 
+            <section class="card key-file-section">
+                <h2><i class="fas fa-key"></i> Key File</h2>
+                <div class="option-group checkbox">
+                    <label for="useKeyFile">Use key file for additional security:</label>
+                    <label class="switch">
+                        <input type="checkbox" id="useKeyFile">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div id="keyFileControls" class="key-file-controls disabled">
+                    <button id="select-key-file-btn" class="btn-primary">
+                        <i class="fas fa-file-import"></i> Select key file
+                    </button>
+                    <button id="clear-key-file-btn" class="btn-secondary" disabled>
+                        <i class="fas fa-times"></i> Clear
+                    </button>
+                    <div class="file-info">
+                        <p id="selected-key-file-name">No key file selected</p>
+                    </div>
+                </div>
+            </section>
+
             <section class="card password-section">
                 <h2><i class="fas fa-key"></i> Password</h2>
                 <div class="input-group">
@@ -46,6 +68,9 @@
                     </button>
                     <button onclick="decryptFile()" class="btn-decrypt">
                         <i class="fas fa-unlock"></i> Decrypt
+                    </button>
+                    <button onclick="verifyIntegrity()" class="btn-verify">
+                        <i class="fas fa-shield-alt"></i> Verify Integrity
                     </button>
                 </div>
             </section>
