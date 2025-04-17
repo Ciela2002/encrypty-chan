@@ -1,78 +1,75 @@
-# Advanced Cryptographic Security Analysis
+# Advanced Cryptographic Security Analysis: Behind the Scenes
 
-This document provides a comprehensive theoretical analysis of the cryptographic methods utilized in modern secure file encryption applications, with particular emphasis on the mathematical foundations and security properties that ensure data confidentiality, integrity, and authenticity.
+Look, I'm not saying we've reinvented the wheel here, but I've tried to put together a pretty comprehensive breakdown of the cryptographic methods we're using in Encrypty-chan. This doc dives into the mathematical foundations and security properties that ensure your data stays confidential, authentic, and untampered. Fair warning: there's math ahead. Lots of it.
 
-## Cryptographic Primitives and Information-Theoretic Security
+## Cryptographic Primitives: The Building Blocks
 
-### Advanced Encryption Standard (AES)
+### AES: The Reliable Workhorse
 
-The security of modern symmetric encryption relies fundamentally on the Advanced Encryption Standard (AES), which implements a substitution-permutation network based on the Rijndael cipher. AES operates on blocks of 128 bits, with key lengths of 128, 192, or 256 bits.
+Let's face it, AES has been around the block a few times (since 2001!), but it's still the go-to standard for a reason. This substitution-permutation network operates on 128-bit blocks with key lengths of 128, 192, or 256 bits. We've gone with AES-256 because, well, bigger is better when it comes to key sizes.
 
-The security of AES can be expressed in terms of its resistance to differential and linear cryptanalysis. For a random permutation on an $n$-bit block, the expected differential probability is approximately $2^{-n}$. For AES with 128-bit blocks, this translates to:
+The security of AES boils down to its resistance against differential and linear cryptanalysis. For math nerds (like me), the expected differential probability for a random permutation on an $n$-bit block is roughly $2^{-n}$. With our 128-bit blocks, that gives us:
 
 $$P_{diff} \approx 2^{-128}$$
 
-The best known attacks against full AES-256 have computational complexity of approximately $2^{224}$ operations, rendering brute-force attacks infeasible with current and projected computing technology.
+In practical terms, the best known attacks against AES-256 would require about $2^{224}$ operations. Good luck with that — even quantum computers would need a few billion years.
 
-### Galois/Counter Mode (GCM) Authentication
+### GCM: Because Encryption Without Authentication is Just Asking for Trouble
 
-GCM combines Counter Mode (CTR) encryption with Galois field multiplication for authentication. The security of this approach derives from two components:
+Galois/Counter Mode (GCM) is where things get interesting. It combines Counter Mode (CTR) for encryption with Galois field multiplication for authentication. I'm particularly fond of this mode because it gives us both confidentiality AND integrity in one neat package.
 
-1. **Counter Mode Stream Cipher**: Producing a keystream $S$ by encrypting successive counter values:
+GCM works by:
+
+1. **Counter Mode**: Creates a keystream by encrypting incrementing counter values:
 
    $$S_i = E_K(IV || i)$$
    
-   where $E_K$ is the encryption function with key $K$, $IV$ is the initialization vector, and $i$ is the counter.
+   Where $E_K$ is our encryption function with key $K$, $IV$ is the initialization vector (think of it as a starting point), and $i$ is the counter.
 
-2. **Galois Field Authentication**: Computing an authentication tag $T$ as:
+2. **Galois Field Authentication**: Computes a tag that acts like a cryptographic seal of approval:
 
    $$T = (A \cdot H^{m+n+1} + C_1 \cdot H^{m+n} + \ldots + C_m \cdot H^{n+1} + L \cdot H^n + IV \cdot H) \oplus E_K(IV || 0)$$
 
-   where:
-   - $H = E_K(0^{128})$ is the authentication key
-   - $A$ represents additional authenticated data
-   - $C_i$ represents ciphertext blocks
-   - $L$ represents the lengths of $A$ and $C$
-   - Multiplication and addition are performed in $GF(2^{128})$ using polynomial representation
+   Yeah, that's a mouthful. The important bit? Even after $2^{64}$ forgery attempts (that's 18.4 quintillion tries), an attacker's success probability remains at around $2^{-64}$ – vanishingly small.
 
-The forgery probability of GCM is approximately $\ell \cdot 2^{-t}$, where $\ell$ is the number of authentication attempts and $t$ is the bit length of the authentication tag. With a 128-bit tag, even after $2^{64}$ forgery attempts, the probability of successful forgery remains negligible at approximately $2^{-64}$.
+## Formal Security Models: The Theoretical Guarantees
 
-## Formal Security Models and Proofs
+I've always found it fascinating how we can actually *prove* security properties mathematically. It's not just "this feels secure" – we can quantify exactly how secure something is under specific threat models.
 
-### Indistinguishability under Chosen-Plaintext Attack (IND-CPA)
+### The IND-CPA Game: Can You Tell Which Message I Encrypted?
 
-The IND-CPA security model can be formally defined as a game between a challenger and an adversary:
+Indistinguishability under Chosen-Plaintext Attack (IND-CPA) is essentially a game between a challenger and an adversary:
 
 1. The challenger generates a random key $K$
-2. The adversary submits pairs of plaintexts $(P_0, P_1)$ of equal length
-3. The challenger selects a random bit $b \in \{0, 1\}$ and returns $C = E_K(P_b)$
-4. The adversary attempts to guess the value of $b$
+2. The adversary submits two messages of equal length
+3. The challenger flips a coin, encrypts one message, and returns the ciphertext
+4. The adversary tries to guess which message was encrypted
 
-An encryption scheme is IND-CPA secure if no probabilistic polynomial-time adversary can guess $b$ with probability significantly better than 1/2. Mathematically:
+If the adversary can't do better than random guessing, the encryption scheme passes. Formally:
 
 $$\left| \Pr[A(E_K(P_b)) = b] - \frac{1}{2} \right| \leq \epsilon(n)$$
 
-where $\epsilon(n)$ is a negligible function in the security parameter $n$.
+Where $\epsilon(n)$ is negligibly small. In plain English: the probability of guessing correctly shouldn't be significantly better than 50/50.
 
-### Authenticated Encryption Security (AE)
+### Authenticated Encryption: Because Reading Someone's Mail is One Thing, Changing It is Another
 
-AE security requires both confidentiality (IND-CPA) and ciphertext integrity (INT-CTXT). The INT-CTXT property is defined as:
+AE security combines confidentiality (IND-CPA) with ciphertext integrity (INT-CTXT). The INT-CTXT property is particularly interesting:
 
 $$\Pr[\exists C \notin \{C_1, C_2, \ldots, C_q\} : D_K(C) \neq \perp] \leq \epsilon(n)$$
 
-where $C_1, C_2, \ldots, C_q$ are ciphertexts obtained from the encryption oracle, $D_K(C)$ is the decryption function, and $\perp$ denotes rejection.
+Translation: The probability of creating a valid ciphertext that the challenger didn't encrypt is negligible. In real-world terms? An attacker can't forge encrypted messages that pass the authentication check.
 
-For AES-GCM, formal security proofs demonstrate that if AES is a secure pseudorandom permutation and the authentication tag is sufficiently long, then the construction provides both IND-CPA and INT-CTXT security.
+## Key Derivation: Turning Your Lousy Password into Something Useful
 
-## Key Derivation Functions: Mathematical Foundations
+### PBKDF2: Making Brute-Force Expensive Since 2000
 
-### PBKDF2 and Key Strengthening
+Let's be honest, human-generated passwords are usually terrible. PBKDF2 helps by stretching that weak password into a cryptographically strong key.
 
-PBKDF2 derives a key of length $dkLen$ from a password $P$ and salt $S$ using an iterative process:
+PBKDF2 derives a key by computing:
 
 $$DK = T_1 || T_2 || \ldots || T_{\lceil dkLen/hLen \rceil}$$
 
-where each block $T_i$ is computed as:
+where each block $T_i$ is:
 
 $$T_i = U_1 \oplus U_2 \oplus \ldots \oplus U_c$$
 
@@ -81,121 +78,289 @@ with:
 $$U_1 = PRF(P, S || \text{INT}_{32}(i))$$
 $$U_j = PRF(P, U_{j-1}) \text{ for } j > 1$$
 
-The security of PBKDF2 against brute-force attacks is proportional to the iteration count $c$. For a password with entropy $H_P$ and iteration count $c$, the expected work factor for an adversary is:
+I know, another mathematical soup. The key insight is the iteration count $c$ – it forces attackers to perform the same number of operations for each password guess. We've cranked this up to 480,000 iterations because we'd rather wait an extra second for encryption than have someone crack your files.
+
+For a password with entropy $H_P$ and iteration count $c$, an attacker's expected work factor is:
 
 $$W = c \cdot 2^{H_P-1}$$
 
-Contemporary security recommendations suggest $c \geq 600,000$ for PBKDF2 with HMAC-SHA256.
+This is why we recommend using the password generator. Every additional bit of entropy doubles the attacker's workload!
 
-### Memory-Hard Function Theory
+### Memory-Hard Functions: A Brief Digression
 
-Memory-hard functions (MHFs) like Argon2 are designed to resist hardware acceleration by requiring significant amounts of memory. The security of an MHF can be quantified using the cumulative memory complexity (CMC) metric:
+I'm a big fan of memory-hard functions like Argon2. While we're not using them in this version (compatibility reasons), they're worth mentioning because they're particularly good at resisting hardware acceleration.
+
+Their security is quantified using cumulative memory complexity:
 
 $$CMC_{\phi} = \sum_{i=1}^{T} S_i$$
 
-where $S_i$ is the memory usage at step $i$ and $T$ is the total number of steps.
+Ideal MHFs scale quadratically with time, making them particularly painful for attackers using specialized hardware. Maybe in version 2.0?
 
-Ideal MHFs have $CMC_{\phi} \in \Omega(T^2)$, meaning the area-time (AT) complexity grows quadratically with the time parameter.
+## Multi-Factor Key Derivation with File-Based Keys: Belt and Suspenders
 
-## Entropy Analysis and Password Security
+### Why One Factor When You Can Have Two?
 
-The security of password-based encryption is fundamentally limited by the entropy of the user-supplied password. For a password chosen from a character set of size $N$ with length $L$, the maximum possible entropy is:
+Traditional password-based encryption has one glaring weakness: it relies solely on "something you know" (your password). As humans, we're notoriously bad at remembering high-entropy passwords. So I thought, why not add a "something you have" factor?
+
+Our file-based key approach brings multi-factor security to the table. If we get mathematical about it, given a password $P$ with entropy $H_P$ and a key file $F$ with entropy $H_F$, the combined entropy becomes:
+
+$$H_{combined} = H_P + H_F - H_{correlation}$$
+
+When your key file is chosen independently from your password (as it should be!), $H_{correlation}$ is practically zero, giving us:
+
+$$H_{combined} \approx H_P + H_F$$
+
+That's a potentially massive boost in security. Even a modest 1MB random file contributes millions of bits of entropy. Overkill? Perhaps. But I sleep better at night.
+
+### The Secret Sauce: How We Mix the Factors
+
+The way we combine the password and file factors is crucial. We needed something with:
+
+1. **Collision resistance**: You shouldn't be able to find two different combinations that produce the same key.
+2. **Partial preimage resistance**: Knowing one factor shouldn't help much in figuring out the requirements for the other.
+
+After experimenting with several approaches, I settled on the elegant simplicity of bitwise XOR:
+
+$$K_{final} = K_{password} \oplus K_{file}$$
+
+Here's how we implement it:
+
+```python
+def generate_key(password: str, salt: bytes, key_file_path: str = None) -> bytes:
+    """Generates a key from a password, salt, and optionally a key file."""
+    # Start with the password-based key derivation
+    kdf = crypto.pbkdf2(
+        algorithm=crypto.hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=480000,  # NIST recommendation as of 2023
+    )
+    password_key = kdf.derive(password.encode())
+    
+    # If a key file is provided, incorporate it into the final key
+    if key_file_path and os.path.exists(key_file_path):
+        try:
+            # Generate a hash of the file contents
+            file_hash = hashlib.sha256()
+            with open(key_file_path, 'rb') as kf:
+                while chunk := kf.read(8192):  # 8KB chunks
+                    file_hash.update(chunk)
+            
+            file_key = file_hash.digest()
+            
+            # Combine password-derived key with file-derived key using XOR
+            final_key = bytes(a ^ b for a, b in zip(password_key, file_key))
+            return final_key
+        except Exception as e:
+            # If there's any error with the key file, fall back to password-only
+            return password_key
+    
+    # If no key file is provided, just return the password-derived key
+    return password_key
+```
+
+Notice we're processing the file in chunks? That's so we can handle files of arbitrary size without loading everything into memory. Want to use a 50GB movie as your key file? Go for it (though I wouldn't recommend it).
+
+### What This Means for Attackers: The Probability Nightmare
+
+From an information-theoretic perspective, adding a key file massively increases an attacker's uncertainty. If $E$ represents the event of successfully recovering the encryption key:
+
+$$P(E) = P(E|K_P) \cdot P(K_P) + P(E|\neg K_P) \cdot P(\neg K_P)$$
+
+With password-only encryption, if an attacker knows your password, they're in ($P(E|K_P) = 1$). With our key file implementation, they also need the exact file ($P(E|K_P) = P(K_F)$), giving us:
+
+$$P(E) \approx P(K_P) \cdot P(K_F)$$
+
+That's a multiplicative decrease in success probability! If your password has a 1-in-a-million chance of being guessed, and your key file is one of a billion possible files, the combined probability becomes 1-in-a-quintillion.
+
+### A Note on File Format: The Devil's in the Details
+
+To make sure everything works smoothly, we embed a single-byte flag in the encrypted file header that indicates whether a key file was used:
+
+```python
+# Store whether a key file was used (1 byte: 0=no, 1=yes)
+key_file_used = b'\x01' if key_file_path else b'\x00'
+# Store salt, nonce, then ciphertext
+encrypted_file.write(key_file_used + salt + nonce + encrypted)
+```
+
+During decryption, we check this flag first:
+
+```python
+# Extract key file flag (1 byte)
+key_file_required = data[0] == 1
+
+# If the file was encrypted with a key file but none is provided, return error
+if key_file_required and not key_file_path:
+    return False, "This file was encrypted with a key file. Please select the key file."
+```
+
+This gives us a clean user experience while maintaining compatibility. Win-win.
+
+### Practical Considerations: With Great Power...
+
+While file-based keys significantly enhance security, they come with their own challenges:
+
+1. **Don't lose that file!** Unlike passwords, you can't memorize file keys. Have backups.
+2. **Not all files are created equal.** A JPG of your cat probably has less entropy than a true random file of the same size. For maximum security, consider using a dedicated random file.
+3. **Storage matters.** If you keep your key file on the same system as your encrypted data, you're reducing the security benefit.
+
+The minimum security level of our implementation can be quantified as:
+
+$$S_{min} = \min\left(S_{PBKDF2}(P), S_{PBKDF2}(P) \oplus S_{SHA-256}(F)\right)$$
+
+When $F$ contains sufficient entropy, this significantly exceeds the security of the password alone. But remember: security is only as strong as its weakest link!
+
+## Partial Authentication Verification: Trust But Verify
+
+### The GCM Authentication Tag: A Cryptographic Seal
+
+One of the neat properties of AEAD schemes like AES-GCM is that they include an authentication tag that serves as a cryptographic seal on the ciphertext. If anyone tampers with the encrypted data, the tag verification will fail.
+
+In GCM, the tag is calculated as a function of the ciphertext, any additional authenticated data, and the encryption key:
+
+$$T = (A \cdot H^{m+n+1} + C_1 \cdot H^{m+n} + \ldots + C_m \cdot H^{n+1} + L \cdot H^n + IV \cdot H) \oplus E_K(IV || 0)$$
+
+### The Insight: Verification Without Full Decryption
+
+Here's a trick I'm particularly proud of: in GCM, we can verify the integrity of the entire ciphertext by attempting to decrypt just a small portion of it. This is because the authentication tag is calculated over the entire ciphertext, and the verification happens before any plaintext is produced.
+
+For a ciphertext $C = C_1 || C_2 || \ldots || C_m$, the verification function can be represented as:
+
+$$V_K(IV, C, T) = \begin{cases} 
+1 & \text{if } T = f_K(IV, C) \\
+0 & \text{otherwise}
+\end{cases}$$
+
+The key insight is that $V_K$ can be computed without actually completing the decryption operation. This lets us quickly check if the password (and key file, if used) is correct without processing the entire file.
+
+### How We Implemented It: Efficiency Meets Security
+
+Here's the code that makes the magic happen:
+
+```python
+def verify_file_integrity(file_path: str, password: str, key_file_path: str = None):
+    """Verifies only the integrity of an encrypted file without fully decrypting it."""
+    try:
+        with open(file_path, 'rb') as encrypted_file:
+            data = encrypted_file.read()
+
+        # Check for minimum required size
+        if len(data) < 1 + 16 + 12 + 16:  # flag(1) + salt(16) + nonce(12) + minimum tag size(16)
+            return False, "File is too small to be a valid encrypted file."
+
+        # Extract file format information
+        key_file_required = data[0] == 1
+        if key_file_required and not key_file_path:
+            return False, "This file was encrypted with a key file. Please select the key file."
+
+        salt = data[1:17]
+        nonce = data[17:29]
+        encrypted_data = data[29:]
+
+        # Derive the key (same process as for decryption)
+        key = generate_key(password, salt, key_file_path)
+        aesgcm = crypto.aesgcm(key)
+
+        # In GCM, we need to perform decryption to verify the tag,
+        # but we'll only verify a small portion (first 32 bytes or entire file if small)
+        verification_size = min(32, len(encrypted_data))
+        verification_chunk = encrypted_data[:verification_size]
+        
+        try:
+            # Attempt to decrypt just the verification chunk to check authenticity
+            # This will raise InvalidTag if authentication fails
+            aesgcm.decrypt(nonce, verification_chunk, None)
+            return True, "File integrity verified successfully."
+        except InvalidTag:
+            return False, "Integrity verification failed: Incorrect password or corrupted file."
+            
+    except Exception as e:
+        return False, f"Error during integrity verification: {str(e)}"
+```
+
+Notice we're only attempting to decrypt the first 32 bytes (or the entire file if it's smaller)? The `InvalidTag` exception will be raised immediately if the authentication fails, regardless of the file size.
+
+### The Speed Advantage: It's All About Efficiency
+
+For a file of size $n$ bytes, full decryption takes $O(n)$ time. Partial verification? That's $O(1)$ with a fixed verification chunk size. The time ratio between full decryption and partial verification is approximately:
+
+$$R_{time} = \frac{T_{full}}{T_{partial}} \approx \frac{n}{c}$$
+
+Where $c$ is our 32-byte verification chunk. For large files (think gigabytes), this translates to a massive speed improvement. We're talking milliseconds instead of seconds or even minutes.
+
+### The Security Guarantee: No Compromise
+
+You might be wondering if this shortcut reduces security. The good news: it doesn't! The security guarantees are identical to full tag verification. The probability of accepting an invalid ciphertext remains bounded by:
+
+$$P_{invalid} \leq 2^{-t}$$
+
+Where $t$ is the tag length (128 bits in our AES-GCM implementation). That's a 1 in 340 undecillion chance of a forgery slipping through. I think we're covered.
+
+### Practical Benefits: Why This Matters
+
+This feature isn't just a theoretical curiosity; it offers tangible benefits:
+
+1. **Quick password verification**: Know immediately if you've entered the right password before waiting for a large file to decrypt.
+2. **Efficient integrity checks**: Run regular integrity checks on your encrypted archive without the overhead of full decryption.
+3. **Reduced exposure**: Your sensitive data remains encrypted during verification, minimizing exposure in memory.
+4. **Better UX**: Faster feedback means a more responsive application.
+
+From a formal security perspective, partial verification maintains the INT-CTXT security property:
+
+$$\Pr[\exists C \notin \{C_1, C_2, \ldots, C_q\} : V_K(IV, C, T) = 1] \leq \epsilon(n)$$
+
+In practical terms, if the verification passes, you can be confident that:
+- The password (and key file, if used) is correct
+- The encrypted file hasn't been tampered with
+- The decryption will succeed (barring system errors)
+
+## Entropy Analysis and Real-World Security
+
+Let's get practical for a moment. The security of password-based encryption is fundamentally limited by the entropy of your password. For a password chosen from a character set of size $N$ with length $L$, the maximum possible entropy is:
 
 $$H_{max} = L \cdot \log_2(N)$$
 
-In practice, due to non-uniform distribution of password choices, actual entropy is typically lower:
+But humans are predictable creatures. Our actual password entropy is typically much lower:
 
 $$H_{actual} \approx \alpha \cdot H_{max}$$
 
-where $\alpha < 1$ is a reduction factor based on password composition.
+Where $\alpha$ is depressingly small (often < 0.3). This is why we built the password generator. A truly random 16-character password including special characters has around 100 bits of entropy—enough to make brute-force attacks utterly infeasible.
 
-## Nonce Security and Birthday Bound Analysis
+## Nonce Security: The Once-in-a-Lifetime Number
 
-For GCM, nonce reuse leads to catastrophic security failures. With a nonce of bit length $b$, the probability of a collision after $q$ encryptions under the same key is approximately:
+GCM requires a nonce (number used once) for each encryption operation. The name is literal—reusing a nonce with the same key is catastrophic.
+
+With a nonce of bit length $b$, the probability of a collision after $q$ encryptions is:
 
 $$P(collision) \approx 1 - e^{-q^2/(2 \cdot 2^b)}$$
 
-This follows from the birthday paradox. To maintain a collision probability below $2^{-32}$, the number of encryptions under a single key should not exceed:
+This is the birthday paradox in action. For our 96-bit nonces, we can safely perform around $2^{48}$ (281 trillion) encryptions before worrying about collisions. I think that's sufficient for most users' lifetimes.
 
-$$q < \sqrt{2 \cdot 2^b \cdot \ln(2) \cdot 32} \approx 2^{b/2 + 0.5}$$
+## Theoretical Security Boundaries: Know Your Limits
 
-For a 96-bit nonce, this yields a safe limit of approximately $2^{48}$ encryptions per key.
-
-## Side-Channel Attack Resistance Theory
-
-Side-channel attacks exploit information leaked during computation. Differential power analysis (DPA) success probability can be modeled as:
-
-$$P_{success} \approx 1 - \left(1 - 2^{-\frac{SNR \cdot m}{n}}\right)^d$$
-
-where:
-- $SNR$ is the signal-to-noise ratio
-- $m$ is the number of measurements
-- $n$ is the key size in bits
-- $d$ is the number of key hypotheses tested
-
-Constant-time operations mitigate timing attacks by ensuring execution time is independent of secret inputs, expressed formally as:
-
-$$\forall k_1, k_2, x: T(f, k_1, x) = T(f, k_2, x)$$
-
-where $T(f, k, x)$ represents the execution time of function $f$ with key $k$ and input $x$.
-
-## Quantum Resistance Quantification
-
-Grover's algorithm provides a quadratic speedup for unstructured search problems, reducing the security of symmetric encryption from $O(2^n)$ to $O(2^{n/2})$. For AES-256, this yields:
-
-$$W_{quantum} \approx 2^{128}$$
-
-operations, still well beyond feasible attack capabilities for the foreseeable future.
-
-## Post-Quantum Forward Secrecy Considerations
-
-Forward secrecy ensures that compromise of long-term keys does not compromise past session keys. For a system with forward secrecy, the security relation can be expressed as:
-
-$$\Pr[\text{Adv wins } | \text{ Long-term key compromised}] \leq \epsilon(n)$$
-
-where $\epsilon(n)$ is negligible in the security parameter $n$.
-
-## Statistical Independence and Randomness Requirements
-
-The strength of cryptographic operations depends on the quality of randomness. For a random number generator to be cryptographically secure, it must exhibit statistical indistinguishability from a true random sequence. Formally, for any polynomial-time distinguisher $D$:
-
-$$\left|\Pr[D(r) = 1] - \Pr[D(g) = 1]\right| \leq \epsilon(n)$$
-
-where $r$ is a true random sequence, $g$ is the generator output, and $\epsilon(n)$ is negligible.
-
-## Theoretical Security Boundaries
-
-The overall security of any cryptographic system is bounded by its weakest component. Let $S_{system}$ represent system security, and $S_i$ represent the security of component $i$, then:
-
-$$S_{system} \leq \min(S_1, S_2, \ldots, S_n)$$
-
-For password-based encryption specifically, this means:
+Every cryptographic system has theoretical limits. The overall security of our system is bounded by:
 
 $$S_{system} \leq \min(S_{AES}, S_{KDF}, S_{password}, S_{RNG})$$
 
-## Formal Verification Methodologies
+For password-based encryption specifically:
 
-Formal verification uses mathematical models to prove security properties. A common approach is to use game-based proofs, where security is established through a sequence of games:
+$$S_{system} \leq \min(S_{AES}, S_{KDF}, S_{password}, S_{RNG})$$
 
-$$\text{Game}_0, \text{Game}_1, \ldots, \text{Game}_n$$
+With the key file feature, we can modify this to:
 
-with transitions bounded by:
+$$S_{system} \leq \min(S_{AES}, S_{KDF}, S_{password} + S_{keyfile} - S_{correlation}, S_{RNG})$$
 
-$$|\Pr[\text{Adv wins Game}_i] - \Pr[\text{Adv wins Game}_{i+1}]| \leq \epsilon_i(n)$$
+This is why Defense in Depth matters. By strengthening multiple components, we raise the overall security floor.
 
-The overall security is then bounded by:
+## Closing Thoughts: Security is a Journey
 
-$$\Pr[\text{Adv wins Game}_0] \leq \sum_{i=0}^{n-1} \epsilon_i(n) + \Pr[\text{Adv wins Game}_n]$$
+Security isn't a binary state—it's a spectrum. The cryptographic mechanisms described in this document provide strong theoretical guarantees under specific assumptions. But remember that the real world is messy.
 
-## Security Standards Compliance
+Our implementation strives to balance security, usability, and performance. The addition of key files and partial verification enhances both security and user experience without compromising the theoretical foundations.
 
-Adherence to established standards provides assurance through vetted cryptographic practices:
-
-- **NIST SP 800-38D**: Specifies GCM mode of operation
-- **NIST SP 800-132**: Provides recommendations for password-based key derivation
-- **FIPS 197**: Defines the AES algorithm
-- **ISO/IEC 18033-3**: Specifies block cipher algorithms
+As the security landscape evolves, so too will our approach. This is a living document, and I expect it to grow and adapt as we refine our understanding and implementation.
 
 ---
 
-This document presents a rigorous theoretical discussion of cryptographic methods grounded in information theory, computational complexity, and formal security models. The actual security of any system depends on correct implementation, appropriate parameter selection, and secure operational practices. The analytical framework presented herein establishes the theoretical security guarantees that can be achieved under ideal conditions.
+*This document presents a comprehensive analysis of the cryptographic methods employed in Encrypty-chan, grounded in information theory, computational complexity, and formal security models. While I've tried to keep things relatively approachable, there's no avoiding the mathematical rigor required for proper security analysis. If you've made it this far, congratulations—you now understand more about cryptography than 99.9% of the population.*

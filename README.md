@@ -1,5 +1,9 @@
 # Encrypty-chan
 
+<p align="center">
+  <img src="favi.png" alt="Encrypty-chan Logo" width="150" height="150"/>
+</p>
+
 A secure and easy-to-use file encryption tool with an intuitive interface.
 
 ## Features
@@ -43,12 +47,22 @@ A secure and easy-to-use file encryption tool with an intuitive interface.
 
 5. **Generate Password:** Click "Generate Password" to get a random and secure password.
 
+6. **Key File (Optional):**
+   * Enable the "Use key file for additional security" option.
+   * Select any file to use as an additional security key.
+   * You will need the same key file when decrypting the file.
+
+7. **Verify Integrity:**
+   * Select an encrypted file and enter the password.
+   * Click "Verify Integrity" to check if the file is valid without decrypting it.
+
 ## Security
 
 This application implements modern cryptographic standards:
 * AES-256 in Galois/Counter Mode (GCM) for encryption and authentication
 * PBKDF2 with many iterations for secure key derivation
 * Cryptographically secure random number generation
+* Optional key file support for two-factor security (something you know + something you have)
 
 For more details on the cryptographic implementation, please refer to the ENCRYPTION_DETAILS.md file included with the release.
 
@@ -58,6 +72,22 @@ If you encounter any issues:
 1. Ensure you're using the correct password for decryption
 2. Verify that you have write permissions in the folder where files are being saved
 3. Check that the file isn't in use by another application
+4. If using a key file, make sure it's the exact same file used during encryption
+
+## Changelog
+
+### Version 1.1.0 (17/04/2025)
+
+* **New Feature:** Added file integrity verification - Allows checking if a file can be decrypted without actually decrypting it
+* **New Feature:** Added key file support - Use any file as an additional security factor for encryption/decryption
+* **Enhancement:** Improved error messages for decryption failures
+* **Documentation:** Updated security information with details about new features
+
+### Version 1.0.0 (Initial Release)
+
+* Basic file encryption and decryption functionality
+* Password generation capabilities
+* AES-256-GCM encryption with PBKDF2 key derivation
 
 ## License
 
