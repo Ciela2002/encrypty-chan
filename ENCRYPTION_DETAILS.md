@@ -36,7 +36,7 @@ GCM works by:
 
 I've always found it fascinating how we can actually *prove* security properties mathematically. It's not just "this feels secure" – we can quantify exactly how secure something is under specific threat models.
 
-### The IND-CPA Game: Can You Tell Which Message I Encrypted?
+### The IND-CPA Game: Can You Tell Which Message I Encrypted? seriously like.. try?
 
 Indistinguishability under Chosen-Plaintext Attack (IND-CPA) is essentially a game between a challenger and an adversary:
 
@@ -57,13 +57,13 @@ AE security combines confidentiality (IND-CPA) with ciphertext integrity (INT-CT
 
 $$\Pr[\exists C \notin \{C_1, C_2, \ldots, C_q\} : D_K(C) \neq \perp] \leq \epsilon(n)$$
 
-Translation: The probability of creating a valid ciphertext that the challenger didn't encrypt is negligible. In real-world terms? An attacker can't forge encrypted messages that pass the authentication check.
+Translation: The probability of creating a valid ciphertext that the challenger didn't encrypt is negligible. In real-world terms? An attacker can't forge encrypted messages that pass the authentication check. ( i mean the nsa can probably but yeah you see where I'm going)
 
 ## Key Derivation: Turning Your Lousy Password into Something Useful
 
 ### PBKDF2: Making Brute-Force Expensive Since 2000
 
-Let's be honest, human-generated passwords are usually terrible. PBKDF2 helps by stretching that weak password into a cryptographically strong key.
+Let's be honest, human-generated passwords are usually terrible dud i swear your DOG NAME IS NOT A GOOD PASSWORD. PBKDF2 helps by stretching that weak password into a cryptographically strong key.
 
 PBKDF2 derives a key by computing:
 
@@ -78,17 +78,17 @@ with:
 $$U_1 = PRF(P, S || \text{INT}_{32}(i))$$
 $$U_j = PRF(P, U_{j-1}) \text{ for } j > 1$$
 
-I know, another mathematical soup. The key insight is the iteration count $c$ – it forces attackers to perform the same number of operations for each password guess. We've cranked this up to 480,000 iterations because we'd rather wait an extra second for encryption than have someone crack your files.
+I know, another mathematical soup. The key insight is the iteration count $c$ – it forces attackers to perform the same number of operations for each password guess so yeah. We've cranked this up to 480,000 iterations because we'd rather wait an extra second for encryption than have someone crack your files yk .. lol
 
 For a password with entropy $H_P$ and iteration count $c$, an attacker's expected work factor is:
 
 $$W = c \cdot 2^{H_P-1}$$
 
-This is why we recommend using the password generator. Every additional bit of entropy doubles the attacker's workload!
+This is why we recommend using the password generator. Every additional bit of entropy doubles the attacker's workload! and his RRX 4090 Ti uk. 
 
 ### Memory-Hard Functions: A Brief Digression
 
-I'm a big fan of memory-hard functions like Argon2. While we're not using them in this version (compatibility reasons), they're worth mentioning because they're particularly good at resisting hardware acceleration.
+I'm a big fan of memory-hard functions like Argon2. While we're not using them in this version (compatibility reasons), they're worth mentioning because they're particularly good at resisting hardware acceleration. I'm actually actively trying to find a way of using it.
 
 Their security is quantified using cumulative memory complexity:
 
