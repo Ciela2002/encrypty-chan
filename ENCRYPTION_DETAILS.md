@@ -359,7 +359,9 @@ Security isn't a binary state—it's a spectrum. The cryptographic mechanisms de
 
 Our implementation strives to balance security, usability, and performance. The addition of key files and partial verification enhances both security and user experience without compromising the theoretical foundations.
 
-As the security landscape evolves, so too will our approach. This is a living document, and I expect it to grow and adapt as we refine our understanding and implementation.
+As the security landscape evolves, so too will our approach. This is a living document, and I expect it to grow and adapt as we refine our understanding and implementation. 
+
+I say "we" a lot because I have friends who participate. Me, Ciel, I'm not alone on this project. Everyone can contribute. Currently, I have a few friends who are actively participating. We really hope to evolve this application and make cryptography more popular and usable by the general public. 
 
 ---
 
