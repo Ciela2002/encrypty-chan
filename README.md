@@ -1,7 +1,7 @@
 # Encrypty-chan
 
 <p align="center">
-  <img src="favi.png" alt="Encrypty-chan Logo" width="150" height="150"/>
+  <img src="favi.ico" alt="Encrypty-chan Logo" width="150" height="150"/>
 </p>
 
 A secure and easy-to-use file encryption tool with an intuitive interface.
