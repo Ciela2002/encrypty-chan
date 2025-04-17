@@ -159,9 +159,9 @@ def generate_key(password: str, salt: bytes, key_file_path: str = None) -> bytes
     return password_key
 ```
 
-Notice we're processing the file in chunks? That's so we can handle files of arbitrary size without loading everything into memory. Want to use a 50GB movie as your key file? Go for it (though I wouldn't recommend it).
+Notice we're processing the file in chunks? That's so we can handle files of arbitrary size without loading everything into memory. Want to use a 50GB movie as your key file? Go for it (though I wouldn't recommend it seriously your 4K jav movie is not worth it man.. just use a picture of your dog like everyone imo lol).
 
-### What This Means for Attackers: The Probability Nightmare
+### What This Means for Attackers: The Probability Nightmare 
 
 From an information-theoretic perspective, adding a key file massively increases an attacker's uncertainty. If $E$ represents the event of successfully recovering the encryption key:
 
@@ -171,7 +171,7 @@ With password-only encryption, if an attacker knows your password, they're in ($
 
 $$P(E) \approx P(K_P) \cdot P(K_F)$$
 
-That's a multiplicative decrease in success probability! If your password has a 1-in-a-million chance of being guessed, and your key file is one of a billion possible files, the combined probability becomes 1-in-a-quintillion.
+That's a multiplicative decrease in success probability! If your password has a 1-in-a-million chance of being guessed, and your key file is one of a billion possible files, the combined probability becomes 1-in-a-quintillion. and if you name your file with a long ass name IT'S EVEN BETTER!! 
 
 ### A Note on File Format: The Devil's in the Details
 
@@ -201,8 +201,8 @@ This gives us a clean user experience while maintaining compatibility. Win-win.
 
 While file-based keys significantly enhance security, they come with their own challenges:
 
-1. **Don't lose that file!** Unlike passwords, you can't memorize file keys. Have backups.
-2. **Not all files are created equal.** A JPG of your cat probably has less entropy than a true random file of the same size. For maximum security, consider using a dedicated random file.
+1. **Don't lose that file!** Unlike passwords, you can't memorize file keys. Have backups that why i recommend a usb stick with the files en the enc file!!.
+2. **Not all files are created equal.** A JPG of your cat probably has less entropy than a true random file of the same size. For maximum security, consider using a dedicated random file like don't use rick roll mp3 too easy!!.
 3. **Storage matters.** If you keep your key file on the same system as your encrypted data, you're reducing the security benefit.
 
 The minimum security level of our implementation can be quantified as:
@@ -232,7 +232,7 @@ $$V_K(IV, C, T) = \begin{cases}
 0 & \text{otherwise}
 \end{cases}$$
 
-The key insight is that $V_K$ can be computed without actually completing the decryption operation. This lets us quickly check if the password (and key file, if used) is correct without processing the entire file.
+The key insight is that $V_K$ can be computed without actually completing the decryption operation ( wich help a lots like fucking lots). This lets us quickly check if the password (and key file, if used) is correct without processing the entire file.
 
 ### How We Implemented It: Efficiency Meets Security
 
@@ -281,13 +281,13 @@ def verify_file_integrity(file_path: str, password: str, key_file_path: str = No
 
 Notice we're only attempting to decrypt the first 32 bytes (or the entire file if it's smaller)? The `InvalidTag` exception will be raised immediately if the authentication fails, regardless of the file size.
 
-### The Speed Advantage: It's All About Efficiency
+### The Speed Advantage: It's All About Efficiency 
 
 For a file of size $n$ bytes, full decryption takes $O(n)$ time. Partial verification? That's $O(1)$ with a fixed verification chunk size. The time ratio between full decryption and partial verification is approximately:
 
 $$R_{time} = \frac{T_{full}}{T_{partial}} \approx \frac{n}{c}$$
 
-Where $c$ is our 32-byte verification chunk. For large files (think gigabytes), this translates to a massive speed improvement. We're talking milliseconds instead of seconds or even minutes.
+Where $c$ is our 32-byte verification chunk. For large files (think gigabytes), this translates to a massive speed improvement. We're talking milliseconds instead of seconds or even minutes this is insane.
 
 ### The Security Guarantee: No Compromise
 
@@ -295,7 +295,7 @@ You might be wondering if this shortcut reduces security. The good news: it does
 
 $$P_{invalid} \leq 2^{-t}$$
 
-Where $t$ is the tag length (128 bits in our AES-GCM implementation). That's a 1 in 340 undecillion chance of a forgery slipping through. I think we're covered.
+Where $t$ is the tag length (128 bits in our AES-GCM implementation). That's a 1 in 340 undecillion chance of a forgery slipping through. I think we're covered. i mean if your dad have a quantum pc to acces your shady files ur fuck but yeah.
 
 ### Practical Benefits: Why This Matters
 
