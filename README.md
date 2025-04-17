@@ -22,6 +22,21 @@ A secure and easy-to-use file encryption tool with an intuitive interface.
 
 2. No additional installation required - the application is ready to use!
 
+### Building from Source
+
+If you prefer to run the application from source code:
+
+1. Ensure you have Python 3.8+ installed on your system
+2. Clone the repository or download the source code
+3. Install the required dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Run the application:
+   ```bash
+   python app.py
+   ```
+
 ### System Requirements
 
 * Windows 10/11, macOS 10.14+, or Linux (with GTK 3+)
